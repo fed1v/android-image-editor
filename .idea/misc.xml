@@ -3,7 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Users/Ivan/AndroidStudioProjects/android_image_editor/app/src/main/res/layout/activity_main.xml" value="0.16" />
+        <entry key="..\:/Users/Ivan/AndroidStudioProjects/android_image_editor/app/src/main/res/layout/activity_image_edit.xml" value="0.22" />
+        <entry key="..\:/Users/Ivan/AndroidStudioProjects/android_image_editor/app/src/main/res/layout/activity_main.xml" value="0.33" />
+        <entry key="..\:/Users/Ivan/AndroidStudioProjects/android_image_editor/app/src/main/res/layout/menu_text_alignment.xml" value="0.2713541666666667" />
+        <entry key="..\:/Users/Ivan/AndroidStudioProjects/android_image_editor/app/src/main/res/layout/menu_text_settings.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/Ivan/AndroidStudioProjects/android_image_editor/app/src/main/res/layout/picker_text_size.xml" value="0.36666666666666664" />
       </map>
     </option>
   </component>
