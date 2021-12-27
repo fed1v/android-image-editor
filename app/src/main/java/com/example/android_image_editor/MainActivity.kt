@@ -1,28 +1,21 @@
 package com.example.android_image_editor
 
 import android.Manifest
-import android.app.Dialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
-import android.text.TextUtils
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.widget.*
-import android.widget.Toast.makeText
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
-import java.io.ByteArrayOutputStream
 
 class MainActivity : AppCompatActivity() {
     lateinit var imageView: ImageView
@@ -34,12 +27,22 @@ class MainActivity : AppCompatActivity() {
     lateinit var textSettingsDialog: AlertDialog.Builder
     lateinit var root: LinearLayout
     lateinit var numberPicker: NumberPicker
-
     lateinit var textSizeView: View
+
+    val textSettings = arrayOf("Text size", "Text color", "Text alignment", "Background")
 
     val textAlignmentOptions = arrayOf("Start", "Center", "End")
     var selectedTextAlignmentIndex = 0
     var selectedTextAlignmentOption = textAlignmentOptions[selectedTextAlignmentIndex]
+
+    val textColorOptions = arrayOf("White", "Black", "Blue", "Red", "Green", "Yellow", "Cyan")
+    var selectedTextColorIndex = 0
+    var selectedTextColor = textColorOptions[selectedTextColorIndex]
+
+    val backgroundOptions =
+        arrayOf("No", "White", "Black", "Blue", "Red", "Green", "Yellow", "Cyan")
+    var selectedBackgroundIndex = 0
+    var selectedBackground = backgroundOptions[selectedBackgroundIndex]
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,8 +51,6 @@ class MainActivity : AppCompatActivity() {
         initView()
         checkCameraPermissions()
 
-        val textSettings = arrayOf("Text size", "Text color", "Text alignment", "Text background")
-
         btnOpenCamera.setOnClickListener { openCamera() }
 
         btnTextSettings.setOnClickListener {
@@ -57,11 +58,9 @@ class MainActivity : AppCompatActivity() {
                 .setTitle("Text settings")
                 .setItems(textSettings) { dialogInterface, which ->
                     openSettingsDialog(which)
-                    dialogInterface?.dismiss()
                 }
                 .show()
         }
-
         btn_ok.setOnClickListener {
             val text = enter_text.text.toString()
             image_text.text = text
@@ -75,36 +74,16 @@ class MainActivity : AppCompatActivity() {
 
             return@setOnTouchListener true
         }
-
-
     }
-
 
     private fun openSettingsDialog(which: Int) {
         textSizeView = layoutInflater.inflate(R.layout.picker_text_size, null)
         initNumberPicker()
-
         when (which) {
-            0 -> {
-                openTextSizeSettings()
-            }
-
-            1 -> {
-
-
-                Snackbar.make(root, "Text color", Snackbar.LENGTH_SHORT).show()
-            }
-
-            2 -> {
-                openTextAlignmentSettings()
-            }
-
-            3 -> {
-
-                Snackbar.make(root, "Background", Snackbar.LENGTH_SHORT).show()
-            }
-
-
+            0 -> openTextSizeSettings()
+            1 -> openTextColorSettings()
+            2 -> openTextAlignmentSettings()
+            3 -> openBackgroundSettings()
         }
     }
 
@@ -115,7 +94,8 @@ class MainActivity : AppCompatActivity() {
                 changeTextSize()
             }
             .setNegativeButton("Cancel") { _, _ -> }
-            .setView(textSizeView).show()
+            .setView(textSizeView)
+            .show()
     }
 
     private fun openTextAlignmentSettings() {
@@ -126,14 +106,54 @@ class MainActivity : AppCompatActivity() {
                 selectedTextAlignmentIndex
             ) { dialog, which ->
                 selectedTextAlignmentIndex = which
-                selectedTextAlignmentOption =
-                    textAlignmentOptions[selectedTextAlignmentIndex]
+                selectedTextAlignmentOption = textAlignmentOptions[selectedTextAlignmentIndex]
             }
             .setPositiveButton("Ok") { _, _ ->
                 changeTextAlignment(selectedTextAlignmentIndex)
             }
             .setNegativeButton("Cancel") { _, _ -> }
             .show()
+    }
+
+    private fun openTextColorSettings() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Text color")
+            .setSingleChoiceItems(textColorOptions, selectedTextColorIndex) { dialog, which ->
+                selectedTextColorIndex = which
+                selectedTextColor = textColorOptions[selectedTextColorIndex]
+            }
+            .setPositiveButton("Ok") { _, _ ->
+                changeTextColor()
+            }
+            .setNegativeButton("Cancel") { _, _ -> }
+            .show()
+    }
+
+    private fun openBackgroundSettings() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Background")
+            .setSingleChoiceItems(backgroundOptions, selectedBackgroundIndex) { dialog, which ->
+                selectedBackgroundIndex = which
+                selectedBackground = backgroundOptions[selectedBackgroundIndex]
+            }
+            .setPositiveButton("Ok") { _, _ ->
+                changeBackgroundColor()
+            }
+            .setNegativeButton("Cancel") { _, _ -> }
+            .show()
+    }
+
+    private fun changeBackgroundColor() {
+        when (selectedBackground) {
+            "No" -> image_text.setBackgroundColor(Color.TRANSPARENT)
+            "Black" -> image_text.setBackgroundColor(Color.BLACK)
+            "White" -> image_text.setBackgroundColor(Color.WHITE)
+            "Blue" -> image_text.setBackgroundColor(Color.BLUE)
+            "Red" -> image_text.setBackgroundColor(Color.RED)
+            "Green" -> image_text.setBackgroundColor(Color.GREEN)
+            "Yellow" -> image_text.setBackgroundColor(Color.YELLOW)
+            "Cyan" -> image_text.setBackgroundColor(Color.CYAN)
+        }
     }
 
     private fun changeTextSize() {
@@ -146,31 +166,25 @@ class MainActivity : AppCompatActivity() {
             2 -> Gravity.END
             else -> Gravity.CENTER
         }
-
     }
 
-
-    private fun switchImageEditActivity() {
-        // val intent = Intent(this, ImageEditActivity::class.java)
-
-        //    val byteArray = imageToByteArray()
-        //    intent.putExtra("image", R.)
-
-        //    startActivity(intent)
-    }
-
-    private fun imageToByteArray(): ByteArray {
-        val bmp = BitmapFactory.decodeResource(resources, R.id.image_view)
-        val stream = ByteArrayOutputStream()
-        bmp.compress(Bitmap.CompressFormat.PNG, 100, stream)
-        return stream.toByteArray()
+    private fun changeTextColor() {
+        when (selectedTextColor) {
+            "Black" -> image_text.setTextColor(Color.BLACK)
+            "White" -> image_text.setTextColor(Color.WHITE)
+            "Blue" -> image_text.setTextColor(Color.BLUE)
+            "Red" -> image_text.setTextColor(Color.RED)
+            "Green" -> image_text.setTextColor(Color.GREEN)
+            "Yellow" -> image_text.setTextColor(Color.YELLOW)
+            "Cyan" -> image_text.setTextColor(Color.CYAN)
+        }
     }
 
     private fun initNumberPicker() {
         numberPicker = textSizeView.findViewById(R.id.number_picker)
         numberPicker.minValue = 0
         numberPicker.maxValue = 100
-        numberPicker.value = 50
+        numberPicker.value = 35
     }
 
     private fun initView() {
@@ -178,45 +192,18 @@ class MainActivity : AppCompatActivity() {
 
         imageView = findViewById(R.id.image_view)
         image_text = findViewById(R.id.image_text)
-        image_text.setTextColor(Color.YELLOW)
-        image_text.setBackgroundColor(Color.RED)
+        image_text.setTextColor(Color.BLACK)
 
         btnOpenCamera = findViewById(R.id.btn_open_camera)
         btnTextSettings = findViewById(R.id.btn_text_settings)
         btn_ok = findViewById(R.id.btn_ok)
         enter_text = findViewById(R.id.enter_text)
 
-        //
-        //
-
         textSettingsDialog = AlertDialog.Builder(this)
 
         textSizeView = layoutInflater.inflate(R.layout.picker_text_size, null)
 
         initNumberPicker()
-
-
-        /*textSizeDialog = AlertDialog.Builder(this)
-        textSizeDialog.setTitle("Text size")
-
-        textSizeDialog.setPositiveButton("Ok") { dialogInterface, which ->
-
-            Snackbar.make(root, "Text size: " + numberPicker.value, Snackbar.LENGTH_SHORT).show()
-            dialogInterface.dismiss()
-            image_text.textSize = numberPicker.value.toFloat()
-            textSettingsDialog.show()
-
-            //    root.removeView(textSizeView)
-        }
-
-        textSizeDialog.setNegativeButton("Cancel") { dialogInterface, _ ->
-            dialogInterface.dismiss()
-            textSettingsDialog.show()
-        }
-
-
-        textSizeDialog.setView(textSizeView)*/
-
     }
 
     private fun checkCameraPermissions() {
